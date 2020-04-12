@@ -1,8 +1,8 @@
 from time import time
 import random
 
-CloudHeight = 256
-CloudWidth = 256
+CloudHeight = 406
+CloudWidth = 406
 
 PixelSize = 1
 
