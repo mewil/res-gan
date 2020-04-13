@@ -11,12 +11,7 @@ class ObjectManager(object):
 		self.ObjectClass = ObjectClass
 
 	def GetObject(self, X):
-		if X in self.Object:
-			return self.Object[X]
-
 		Obj = self.ObjectClass(X, self)
-		self.Object[X] = Obj
-
 		return Obj
 
 class CloudManager(ObjectManager):

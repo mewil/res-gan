@@ -1,30 +1,40 @@
 import numpy as np
-import cv2
-from tqdm import tqdm
 from os import listdir
 from os.path import join
+from PIL import Image
+from tqdm import tqdm
+from multiprocessing import Pool
 
 from PythonClouds.Clouds import CloudManager
 
+IMG_SIZE = 406
 
-IMAGE_SIZE = 406
 
-def generate(directory):
-    files = listdir(directory)
-    print('Creating', len(files), 'clouds for directory', directory, '...')
-    for i, filename in tqdm(enumerate(files)):
-        cm = CloudManager()
-        co = cm.GetObject(i * IMAGE_SIZE)
-        cloud = co.Colours
+def generate(filename):
+    filenum = int(filename.replace('3band_AOI_1_RIO_img', '').replace('.png', ''))
+    cm = CloudManager()
+    co = cm.GetObject(filenum)
+    cloud = co.Colours
 
-        cloud = np.array(co.Colours).reshape([IMAGE_SIZE, IMAGE_SIZE, 4])
-        cloud = (cloud * 255).astype(np.uint8)
+    cloud = np.array(co.Colours).reshape([IMG_SIZE, IMG_SIZE, 4])
+    cloud = (cloud * 255).astype(np.uint8)
 
-        cv2.imwrite(join(directory, 'cloud_{}.png'.format(filename)), cloud)
+    img = Image.open(join(directory, filename))
+    img = img.resize((IMG_SIZE, IMG_SIZE), Image.ANTIALIAS)
+    img.save(join(directory, filename))
 
-    print('Created', len(files), 'clouds in directory', directory)
+    cloud = Image.fromarray(cloud)        
+    cloud.save(join(directory,'cloud_{}'.format(filename)))
+
+    img.paste(cloud, (0, 0), cloud.convert('RGBA'))
+    img.save(join(directory,'combined_{}'.format(filename)))
+
 
 
 if __name__ == '__main__':
     for directory in ['train', 'val', 'test']:
-        generate(directory)
+        files = listdir(directory)
+        print('Generating', len(files), 'clouds for directory', directory, '...')
+        for filename in tqdm(files):
+            generate(filename)
+        print('Created', len(files), 'clouds in directory', directory)
