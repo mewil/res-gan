@@ -4,6 +4,7 @@ import shutil
 import yaml
 from attrdict import AttrMap
 from tqdm import tqdm
+from datetime import datetime
 
 import torch
 from torch import nn
@@ -18,7 +19,7 @@ from models.generator import UNet
 from models.discriminator import Discriminator
 import utils
 from utils import gpu_manage, save_image, checkpoint
-from eval import test
+from validate import test
 from log_report import LogReport
 from log_report import TestReport
 
@@ -30,9 +31,9 @@ def train(config):
     print('===> Loading datasets')
 
     train_dataset = Dataset(config.train_dir)
-    test_dataset = Dataset(config.test_dir)
+    val_dataset = Dataset(config.val_dir)
     training_data_loader = DataLoader(dataset=train_dataset, num_workers=config.threads, batch_size=config.batchsize, shuffle=True)
-    test_data_loader = DataLoader(dataset=test_dataset, num_workers=config.threads, batch_size=config.test_batchsize, shuffle=False)
+    val_data_loader = DataLoader(dataset=val_dataset, num_workers=config.threads, batch_size=config.test_batchsize, shuffle=False)
 
     ### MODELS LOAD ###
     print('===> Loading models')
@@ -82,14 +83,14 @@ def train(config):
 
     # main
     for epoch in range(1, config.epoch + 1):
-        print('Epoch', epoch)
+        print('Epoch', epoch, datetime.now())
         for iteration, batch in enumerate(tqdm(training_data_loader)):
             real_a_cpu, real_b_cpu = batch[0], batch[1]
 #             with torch.no_grad():
 #                 real_a.data.resize_(real_a_cpu.size()).copy_(real_a_cpu)
 #                 real_b.data.resize_(real_b_cpu.size()).copy_(real_b_cpu)
-            real_a = F.interpolate(real_a_cpu.permute(0, 3, 1, 2), size=256).to(device)
-            real_b = F.interpolate(real_b_cpu.permute(0, 3, 1, 2), size=256).to(device)
+            real_a = F.interpolate(real_a_cpu, size=256).to(device)
+            real_b = F.interpolate(real_b_cpu, size=256).to(device)
             fake_b = gen.forward(real_a)
 
             ################
@@ -153,7 +154,7 @@ def train(config):
                 logreport(log)
 
         with torch.no_grad():
-            log_test = test(config, test_data_loader, gen, criterionMSE, epoch)
+            log_test = test(config, val_data_loader, gen, criterionMSE, epoch)
             testreport(log_test)
 
         if epoch % config.snapshot_interval == 0:
@@ -161,6 +162,8 @@ def train(config):
 
         logreport.save_lossgraph()
         testreport.save_lossgraph()
+
+    print('Done', datetime.now())
 
 
 if __name__ == '__main__':

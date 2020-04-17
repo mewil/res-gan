@@ -1,4 +1,5 @@
-train_dir: data/train_small
+train_dir: data/train_medium
+val_dir: data/val_medium
 test_dir: data/val_small
 out_dir: results
 
@@ -7,7 +8,7 @@ gpu_ids: [0]
 
 batchsize: 1
 test_batchsize: 1
-epoch: 10
+epoch: 20
 n_data: 10000
 size: 256
 threads: 4
@@ -24,4 +25,4 @@ in_ch: 3
 out_ch: 3
 
 manualSeed: 0
-snapshot_interval: 50
+snapshot_interval: 4

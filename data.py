@@ -22,7 +22,7 @@ class Dataset(data.Dataset):
         combined = imread(join(self.data_dir, 'combined_' + filename)).astype(np.float32)
         
 #         print(combined.shape, rgb.shape)
-        return combined, rgb
+        return combined.transpose(2, 0, 1), rgb.transpose(2, 0, 1)
         # nir = cv2.imread(join(self.config.rgbnir_dir, 'NIR', str(self.imlist[index])), 0).astype(np.float32)
         # cloud = cv2.imread(self.cloud_files[random.randrange(self.n_cloud)], -1).astype(np.float32)
 
@@ -47,26 +47,16 @@ class Dataset(data.Dataset):
     def __len__(self):
         return len(self.imlist)
 
-# class TestDataset(data.Dataset):
-#     def __init__(self, test_dir):
-#         super().__init__()
-#         self.test_dir = test_dir
-        
-#         self.test_files = glob.glob(os.path.join(test_dir, 'RGB', '*.png'))
+class TestDataset(data.Dataset):
+    def __init__(self, data_dir):
+        super().__init__()
+        self.data_dir = data_dir
+        self.imlist = list(map(basename, glob(join(self.data_dir, '3band_AOI_1_RIO_img*.png'))))
 
-#     def __getitem__(self, index):
-#         filename = os.path.basename(self.test_files[index])
-#         cloud_rgb = cv2.imread(os.path.join(self.test_dir, 'RGB', filename), 1).astype(np.float32)
-#         nir = cv2.imread(os.path.join(self.test_dir, 'NIR', filename), 0).astype(np.float32)
+    def __getitem__(self, index):
+        filename = self.imlist[index]
+        combined = imread(join(self.data_dir, 'combined_' + filename)).astype(np.float32)
+        return combined.transpose(2, 0, 1), filename
 
-#         x = np.concatenate((cloud_rgb, nir[:, :, None]), axis=2)
-
-#         x = x / 127.5 - 1
-
-#         x = x.transpose(2, 0, 1)
-
-#         return x, filename
-
-#     def __len__(self):
-
-#         return len(self.test_files)
+    def __len__(self):
+        return len(self.imlist)
