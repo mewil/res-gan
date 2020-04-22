@@ -7,11 +7,6 @@ import random
 # Third-party packages
 from perlin import SimplexNoise
 
-# Modules from this project
-from Utils import FastRandom
-
-# Modules from this project
-
 __all__ = ('SimplexNoiseGen', 'PerlinNoise')
 
 # Factory class utilizing perlin.SimplexNoise
@@ -145,3 +140,12 @@ class PerlinNoise(object):
     def octave(self, value):
         self.OCTAVES = value
         self.regen_weight = True
+
+
+class FastRandom(object):
+	def __init__(self, seed):
+		self.seed = seed
+
+	def randint(self):
+		self.seed = (214013 * self.seed + 2531011)
+		return (self.seed >> 16) & 0x7FFF

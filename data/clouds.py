@@ -3,7 +3,8 @@ from noise import SimplexNoiseGen
 from threading import Thread
 from queue import Queue
 from time import time
-import Config
+from random import randint
+import config as Config
 
 class ObjectManager(object):
 	def __init__(self, ObjectClass):
@@ -44,39 +45,24 @@ class CloudChunk(object):
 		Colours = []
 		Length = 0
 
-		PCMap = {}
-
-		#Generation stuff
-		PixelSize = Config.PixelSize
-
 		YOffset = Config.CloudHeight / 2.0
 
 		Noise = self.Noise
 		NoiseOffset = Config.NoiseOffset
 
-		for X in range(0, Config.CloudWidth, PixelSize):
+		for X in range(0, Config.CloudWidth):
 			XOff = X+self.X
 
-			for Y in range(0, Config.CloudHeight, PixelSize):
+			for Y in range(0, Config.CloudHeight):
 				Points.append(XOff)
 				Points.append(Y)
 
-				Colours.append(1)
-				Colours.append(1)
-				Colours.append(1)
-
+				Colours.extend([1, 1, 1])
 				#Get noise, round and clamp
 				NoiseGen = Noise.fBm(XOff, Y) + NoiseOffset
 				NoiseGen = max(0, min(1, NoiseGen))
-				
-				# Fade around the edges - use cos to get better fading
-				Diff = abs(Y - YOffset) / YOffset
-				NoiseGen *= cos(Diff * pi / 2)
-				
+								
 				Colours.append(NoiseGen)
-
-				if NoiseGen > 0:
-					PCMap[(XOff, Y)] = (1, 1, 1, NoiseGen)
 
 				Length += 1
 
@@ -84,15 +70,10 @@ class CloudChunk(object):
 		self.Points = Points
 		self.Colours = Colours
 		self.Length = Length
-		self.PCMap = PCMap
 
 		#print "Finished Generation at", self.X
 		#print "\tTook",time() - start
 		self.Finished = True
-
-	def GenerateFinshed(self):
-		pass
-		
 
 	def Draw(self, X):
 		if self.Finished:

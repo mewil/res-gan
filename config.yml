@@ -1,12 +1,12 @@
 train_dir: data/train_medium
-val_dir: data/val_medium
-test_dir: data/val_small
+val_dir: data/val_full
+test_dir: data/test_full
 out_dir: results
 
 cuda: True
 gpu_ids: [0]
 
-batchsize: 1
+batchsize: 2
 test_batchsize: 1
 epoch: 20
 n_data: 10000

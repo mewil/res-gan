@@ -38,15 +38,12 @@ def train(config):
     ### MODELS LOAD ###
     print('===> Loading models')
 
-    if config.gen_model == 'unet':
-        gen = UNet(in_ch=config.in_ch, out_ch=config.out_ch, gpu_ids=config.gpu_ids)
-    else:
-        print('The generator model does not exist')
-
+    gen = UNet(in_ch=config.in_ch, out_ch=config.out_ch, gpu_ids=config.gpu_ids)
     if config.gen_init is not None:
         param = torch.load(config.gen_init)
         gen.load_state_dict(param)
         print('load {} as pretrained model'.format(config.gen_init))
+        
     dis = Discriminator(in_ch=config.in_ch, out_ch=config.out_ch, gpu_ids=config.gpu_ids)
     if config.dis_init is not None:
         param = torch.load(config.dis_init)

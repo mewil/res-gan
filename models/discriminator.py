@@ -11,8 +11,6 @@ from models.utils import weights_init, print_network
 class _Discriminator(nn.Module):
     def __init__(self, in_ch, out_ch):
         super().__init__()
-#         self.gpu_ids = gpu_ids
-        
         self.c0_0 = CBR(in_ch, 32, bn=False, sample='down', activation=nn.LeakyReLU(0.2, True), dropout=False)
         self.c0_1 = CBR(out_ch, 32, bn=False, sample='down', activation=nn.LeakyReLU(0.2, True), dropout=False)
         self.c1 = CBR(64, 128, bn=True, sample='down', activation=nn.LeakyReLU(0.2, True), dropout=False)
@@ -29,7 +27,6 @@ class _Discriminator(nn.Module):
         h = self.c3(h)
         h = self.c4(h)
         return h
-
 
 class Discriminator(nn.Module):
     def __init__(self, in_ch, out_ch, gpu_ids):

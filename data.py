@@ -11,12 +11,13 @@ class Dataset(data.Dataset):
     def __init__(self, data_dir):
         super().__init__()
         self.data_dir = data_dir
-        self.imlist = list(map(basename, glob(join(self.data_dir, '3band_AOI_1_RIO_img*.png'))))
+        all_filenames = list(map(basename, glob(join(self.data_dir, '*.png'))))
+        self.imlist = [f for f in all_filenames if '_' not in f]
 
     def __getitem__(self, index):
         filename = self.imlist[index]
         rgb = imread(join(self.data_dir, filename)).astype(np.float32)
-        combined = imread(join(self.data_dir, 'combined_' + filename)).astype(np.float32)
+        combined = imread(join(self.data_dir, filename.replace('.png', '_combined.png'))).astype(np.float32)
         return combined.transpose(2, 0, 1), rgb.transpose(2, 0, 1)
 
 
@@ -27,7 +28,8 @@ class TestDataset(data.Dataset):
     def __init__(self, data_dir):
         super().__init__()
         self.data_dir = data_dir
-        self.imlist = list(listdir(data_dir))
+        all_filenames = list(map(basename, glob(join(self.data_dir, '*.png'))))
+        self.imlist = [f for f in all_filenames if '_combined' in f]
 
     def __getitem__(self, index):
         filename = self.imlist[index]
