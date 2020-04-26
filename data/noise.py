@@ -9,6 +9,7 @@ from perlin import SimplexNoise
 
 __all__ = ('SimplexNoiseGen', 'PerlinNoise')
 
+
 # Factory class utilizing perlin.SimplexNoise
 class SimplexNoiseGen(object):
     def __init__(self, seed, octaves=6, zoom_level=0.002):  # octaves = 6,
@@ -16,14 +17,14 @@ class SimplexNoiseGen(object):
         random.Random(seed).shuffle(perm)
         self.noise = SimplexNoise(permutation_table=perm).noise2
 
-        self.PERSISTENCE = 2.1379201 # AKA lacunarity
+        self.PERSISTENCE = 2.1379201  # AKA lacunarity
         self.H = 0.836281
-        self.OCTAVES = octaves       # Higher linearly increases calc time; increases apparent 'randomness'
-        self.weights = [self.PERSISTENCE ** (-self.H * n) for n in range(self.OCTAVES)]
+        self.OCTAVES = octaves  # Higher linearly increases calc time; increases apparent 'randomness'
+        self.weights = [self.PERSISTENCE**(-self.H * n) for n in range(self.OCTAVES)]
 
-        self.zoom_level = zoom_level # Smaller will create gentler, softer transitions. Larger is more mountainy
+        self.zoom_level = zoom_level  # Smaller will create gentler, softer transitions. Larger is more mountainy
 
-    def fBm(self,x,z):
+    def fBm(self, x, z):
         x *= self.zoom_level
         z *= self.zoom_level
         y = 0
@@ -62,7 +63,7 @@ class PerlinNoise(object):
             self.perm[i] = self.perm[i + 256] = noise_tbl[i]
 
     def fade(self, t):
-        return (t ** 3) * (t * (t * 6 - 15) + 10)
+        return (t**3) * (t * (t * 6 - 15) + 10)
 
     # linear interpolate
     def lerp(self, t, a, b):
@@ -99,19 +100,17 @@ class PerlinNoise(object):
         BA = self.perm[B] + Z
         BB = self.perm[(B + 1)] + Z
 
-        return self.lerp(w,
-                    self.lerp(v, self.lerp(u,
-                                 self.grad(self.perm[AA], x,       y, z),
-                                 self.grad(self.perm[BA], x - 1.0, y, z)),
-                         self.lerp(u,
-                              self.grad(self.perm[AB], x,       y - 1.0, z),
-                              self.grad(self.perm[BB], x - 1.0, y - 1.0, z))),
-                    self.lerp(v, self.lerp(u,
-                                 self.grad(self.perm[(AA + 1)], x,       y, z - 1.0),
-                                 self.grad(self.perm[(BA + 1)], x - 1.0, y, z - 1.0)),
-                    self.lerp(u,
-                         self.grad(self.perm[(AB + 1)], x,       y - 1.0, z - 1.0),
-                         self.grad(self.perm[(BB + 1)], x - 1.0, y - 1.0, z - 1.0))))
+        return self.lerp(
+            w,
+            self.lerp(
+                v, self.lerp(u, self.grad(self.perm[AA], x, y, z), self.grad(self.perm[BA], x - 1.0, y, z)),
+                self.lerp(u, self.grad(self.perm[AB], x, y - 1.0, z), self.grad(self.perm[BB], x - 1.0, y - 1.0, z))),
+            self.lerp(
+                v,
+                self.lerp(u, self.grad(self.perm[(AA + 1)], x, y, z - 1.0),
+                          self.grad(self.perm[(BA + 1)], x - 1.0, y, z - 1.0)),
+                self.lerp(u, self.grad(self.perm[(AB + 1)], x, y - 1.0, z - 1.0),
+                          self.grad(self.perm[(BB + 1)], x - 1.0, y - 1.0, z - 1.0))))
 
     def fBm(self, x, y, z):
         total = 0.0
@@ -119,7 +118,7 @@ class PerlinNoise(object):
         if self.regen_weight:
             self.weights = [None] * self.OCTAVES
             for n in range(self.OCTAVES):
-                self.weights[n] = self.PERSISTENCE ** (-self.H * n)
+                self.weights[n] = self.PERSISTENCE**(-self.H * n)
 
             self.regen_weight = False
 
@@ -143,9 +142,9 @@ class PerlinNoise(object):
 
 
 class FastRandom(object):
-	def __init__(self, seed):
-		self.seed = seed
+    def __init__(self, seed):
+        self.seed = seed
 
-	def randint(self):
-		self.seed = (214013 * self.seed + 2531011)
-		return (self.seed >> 16) & 0x7FFF
+    def randint(self):
+        self.seed = (214013 * self.seed + 2531011)
+        return (self.seed >> 16) & 0x7FFF

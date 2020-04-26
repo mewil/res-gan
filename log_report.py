@@ -16,7 +16,7 @@ class LogReport():
         self.log_.append(log)
         with open(os.path.join(self.log_dir, self.log_name), 'w') as f:
             json.dump(self.log_, f, indent=4)
-    
+
     def save_lossgraph(self):
         epoch = []
         gen_loss = []
@@ -54,12 +54,12 @@ class TestReport():
         self.log_.append(log)
         with open(os.path.join(self.log_dir, self.log_name), 'w') as f:
             json.dump(self.log_, f, indent=4)
-    
+
     def save_lossgraph(self):
         epoch = []
         mse = []
         psnr = []
-        
+
         for l in self.log_:
             epoch.append(l['epoch'])
             mse.append(l['mse'])

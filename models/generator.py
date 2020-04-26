@@ -4,8 +4,7 @@ from torch.autograd import Variable
 import numpy as np
 from collections import OrderedDict
 
-from models.layers import CBR, ResBlock
-from models.utils import weights_init, print_network
+from models.layers import CBR, ResBlock, weights_init
 
 
 class _UNet(nn.Module):

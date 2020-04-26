@@ -8,4 +8,3 @@ NoiseOffset = 0
 Seed = int(100)
 
 Framerate = 30
-

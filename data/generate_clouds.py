@@ -17,11 +17,11 @@ def generate(filename):
     pixels = img.getdata()
     if sum(1 for r, g, b in pixels if r == 0 and g == 0 and b == 0) / len(pixels) > 0.20:
         with open('skipped.txt', 'a') as f:
-            f.write(filename+'\n')
+            f.write(filename + '\n')
         return
     img = img.resize((IMG_SIZE, IMG_SIZE), Image.ANTIALIAS)
     img.save(join(directory, '{}.png'.format(filenum)))
-    
+
     cm = CloudManager()
     co = cm.GetObject(filenum)
     cloud = np.array(co.Colours).reshape([IMG_SIZE, IMG_SIZE, 4])
@@ -30,8 +30,7 @@ def generate(filename):
     cloud.save(join(directory, '{}_cloud.png'.format(filenum)))
 
     img.paste(cloud, (0, 0), cloud.convert('RGBA'))
-    img.save(join(directory,'{}_combined.png'.format(filenum)))
-
+    img.save(join(directory, '{}_combined.png'.format(filenum)))
 
 
 if __name__ == '__main__':

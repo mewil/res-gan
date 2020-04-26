@@ -3,23 +3,20 @@ import argparse
 from tqdm import tqdm
 import yaml
 from attrdict import AttrMap
-
 import torch
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
 
-from data import TestDataset
+from data import Dataset
 from utils import gpu_manage, save_image
 from models.generator import UNet
+from utils import save_image_from_tensors, get_metrics
 
 
 def predict(config, args):
     gpu_manage(args)
-    dataset = TestDataset(args.test_dir)
+    dataset = Dataset(args.test_dir)
     data_loader = DataLoader(dataset=dataset, num_workers=config.threads, batch_size=1, shuffle=False)
-
-    ### MODELS LOAD ###
-    print('===> Loading models')
 
     if config.gen_model == 'unet':
         gen = UNet(in_ch=config.in_ch, out_ch=config.out_ch, gpu_ids=args.gpu_ids)
@@ -32,36 +29,18 @@ def predict(config, args):
 
     with torch.no_grad():
         for i, batch in enumerate(tqdm(data_loader)):
-            x = Variable(batch[0])
-            filename = batch[1][0]
-            if args.cuda:
-                x = x.cuda()
+            input_, ground_truth = Variable(batch[0]), Variable(batch[1])
+            filename = batch[2][0]
 
-            out = gen(x)
+            output = gen(input_)
 
-            h = 1
-            w = 2
-            c = 3
-            p = 406
+            save_image_from_tensors(input_, output, ground_truth, config.out_dir, i, epoch, filename)
+            mse, psnr, ssim = get_metrics(output, ground_truth, criterionMSE)
 
-            allim = np.zeros((h, w, c, p, p))
-            x_ = x.cpu().numpy()[0]
-            out_ = out.cpu().numpy()[0]
-#             print(x_)
-            in_rgb = x_[:2]
-#             print(in_rgb.shape)
-#             print(out_.shape)
-#             in_nir = x_[3]
-            out_rgb = np.clip(out_[:2], -1, 1)
-            out_cloud = np.clip(out_[2], -1, 1)
-#             allim[0, 0, :] = np.repeat(in_nir[None, :, :], repeats=3, axis=0) * 127.5 + 127.5
-            allim[0, 0, :, :, :] = x_ #* 127.5 + 127.5
-            allim[0, 1, :, :, :] = out_ #* 127.5 + 127.5
-#             allim[0, 2, :, :, :] = np.repeat(out_cloud[None, :, :], repeats=3, axis=0)# * 127.5 + 127.5
-            allim = allim.transpose(0, 3, 1, 4, 2)
-            allim = allim.reshape((h*p, w*p, c))
-
-            save_image(args.out_dir, allim, i, 1, filename=filename)
+            print(filename)
+            print('MSE: {:.4f}'.format(mse))
+            print('PSNR: {:.4f} dB'.format(psnr))
+            print('SSIM: {:.4f} dB'.format(ssim))
 
 
 if __name__ == '__main__':

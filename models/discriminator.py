@@ -4,8 +4,7 @@ from torch.autograd import Variable
 import numpy as np
 from collections import OrderedDict
 
-from models.layers import CBR
-from models.utils import weights_init, print_network
+from models.layers import CBR, weights_init
 
 
 class _Discriminator(nn.Module):
@@ -27,6 +26,7 @@ class _Discriminator(nn.Module):
         h = self.c3(h)
         h = self.c4(h)
         return h
+
 
 class Discriminator(nn.Module):
     def __init__(self, in_ch, out_ch, gpu_ids):
