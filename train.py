@@ -76,7 +76,6 @@ def train(config):
     logreport = LogReport(log_dir=config.out_dir)
     testreport = TestReport(log_dir=config.out_dir)
 
-    # main
     for epoch in range(1, config.epoch + 1):
         print('Epoch', epoch, datetime.now())
         for iteration, batch in enumerate(tqdm(training_data_loader)):

@@ -4,6 +4,7 @@ from tqdm import tqdm
 import yaml
 from attrdict import AttrMap
 import torch
+from torch import nn
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
 
@@ -18,14 +19,19 @@ def predict(config, args):
     dataset = Dataset(args.test_dir)
     data_loader = DataLoader(dataset=dataset, num_workers=config.threads, batch_size=1, shuffle=False)
 
-    if config.gen_model == 'unet':
-        gen = UNet(in_ch=config.in_ch, out_ch=config.out_ch, gpu_ids=args.gpu_ids)
+    gen = UNet(in_ch=config.in_ch, out_ch=config.out_ch, gpu_ids=args.gpu_ids)
 
     param = torch.load(args.pretrained)
     gen.load_state_dict(param)
+    criterionMSE = nn.MSELoss()
 
     if args.cuda:
         gen = gen.cuda(0)
+        criterionMSE = criterionMSE.cuda(0)
+
+    avg_mse = 0
+    avg_psnr = 0
+    avg_ssim = 0
 
     with torch.no_grad():
         for i, batch in enumerate(tqdm(data_loader)):
@@ -36,11 +42,22 @@ def predict(config, args):
 
             save_image_from_tensors(input_, output, ground_truth, config.out_dir, i, epoch, filename)
             mse, psnr, ssim = get_metrics(output, ground_truth, criterionMSE)
-
             print(filename)
             print('MSE: {:.4f}'.format(mse))
             print('PSNR: {:.4f} dB'.format(psnr))
             print('SSIM: {:.4f} dB'.format(ssim))
+
+            avg_mse += mse
+            avg_psnr += psnr
+            avg_ssim += ssim
+
+    avg_mse = avg_mse / len(data_loader)
+    avg_psnr = avg_psnr / len(data_loader)
+    avg_ssim = avg_ssim / len(data_loader)
+
+    print('Average MSE: {:.4f}'.format(avg_mse))
+    print('Average PSNR: {:.4f} dB'.format(avg_psnr))
+    print('Average SSIM: {:.4f} dB'.format(avg_ssim))
 
 
 if __name__ == '__main__':

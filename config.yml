@@ -6,10 +6,9 @@ out_dir: results
 cuda: True
 gpu_ids: [0]
 
-batchsize: 2
+batchsize: 1
 test_batchsize: 1
 epoch: 20
-n_data: 10000
 size: 256
 threads: 4
 
