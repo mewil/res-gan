@@ -7,6 +7,7 @@ import torch
 from torch import nn
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
+from torch.nn import functional as F
 
 from data import Dataset
 from utils import gpu_manage, save_image
@@ -28,6 +29,8 @@ def predict(config, args):
     if args.cuda:
         gen = gen.cuda(0)
         criterionMSE = criterionMSE.cuda(0)
+        
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     avg_mse = 0
     avg_psnr = 0
@@ -37,10 +40,12 @@ def predict(config, args):
         for i, batch in enumerate(tqdm(data_loader)):
             input_, ground_truth = Variable(batch[0]), Variable(batch[1])
             filename = batch[2][0]
+            input_ = F.interpolate(input_, size=256).to(device)
+            ground_truth = F.interpolate(ground_truth, size=256).to(device)
 
             output = gen(input_)
 
-            save_image_from_tensors(input_, output, ground_truth, config.out_dir, i, epoch, filename)
+            save_image_from_tensors(input_, output, ground_truth, config.out_dir, i, 0, filename)
             mse, psnr, ssim = get_metrics(output, ground_truth, criterionMSE)
             print(filename)
             print('MSE: {:.4f}'.format(mse))

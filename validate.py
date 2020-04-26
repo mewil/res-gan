@@ -16,7 +16,6 @@ def test(config, test_data_loader, gen, criterionMSE, epoch):
     for i, batch in enumerate(test_data_loader):
         input_, ground_truth = Variable(batch[0]), Variable(batch[1])
         filename = batch[2][0]
-
         input_ = F.interpolate(input_, size=256).to(device)
         ground_truth = F.interpolate(ground_truth, size=256).to(device)
 

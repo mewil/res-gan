@@ -91,6 +91,6 @@ def get_metrics(output, ground_truth, criterionMSE):
     img2 = np.tensordot(ground_truth.cpu().numpy()[0, :3].transpose(1, 2, 0), [0.298912, 0.586611, 0.114478], axes=1)
 
     mse = criterionMSE(output, ground_truth).item()
-    psnr = 10 * np.log10(1 / mse.item())
+    psnr = 10 * np.log10(1 / mse)
     ssim = SSIM(img1, img2)
     return mse, psnr, ssim
