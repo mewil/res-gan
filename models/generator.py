@@ -18,14 +18,18 @@ class _UNet(nn.Module):
         self.c4 = ResBlock(512, 512, activation=nn.LeakyReLU(0.2, True))
         self.c5 = ResBlock(512, 512, activation=nn.LeakyReLU(0.2, True))
         self.c6 = ResBlock(512, 512, activation=nn.LeakyReLU(0.2, True))
+        self.c7 = ResBlock(512, 512, activation=nn.LeakyReLU(0.2, True))
+        self.c8 = ResBlock(512, 512, activation=nn.LeakyReLU(0.2, True))
 
         self.dc0 = ResBlock(512, 512, bn=True, sample='up', activation=nn.ReLU(True))
-        self.dc1 = CBR(1024, 512, bn=True, sample='up', activation=nn.ReLU(True), dropout=True)
-        self.dc2 = CBR(1024, 512, bn=True, sample='up', activation=nn.ReLU(True), dropout=False)
-        self.dc3 = CBR(1024, 256, bn=True, sample='up', activation=nn.ReLU(True), dropout=False)
-        self.dc4 = CBR(512, 128, bn=True, sample='up', activation=nn.ReLU(True), dropout=False)
-        self.dc5 = CBR(256, 64, bn=True, sample='up', activation=nn.ReLU(True), dropout=False)
-        self.dc6 = nn.Conv2d(128, out_ch, 3, 1, 1)
+        self.dc1 = ResBlock(512, 512, bn=True, sample='up', activation=nn.ReLU(True))
+        self.dc2 = ResBlock(512, 512, bn=True, sample='up', activation=nn.ReLU(True))
+        self.dc3 = CBR(1024, 512, bn=True, sample='up', activation=nn.ReLU(True), dropout=True)
+        self.dc4 = CBR(1024, 512, bn=True, sample='up', activation=nn.ReLU(True), dropout=False)
+        self.dc4 = CBR(1024, 256, bn=True, sample='up', activation=nn.ReLU(True), dropout=False)
+        self.dc5 = CBR(512, 128, bn=True, sample='up', activation=nn.ReLU(True), dropout=False)
+        self.dc6 = CBR(256, 64, bn=True, sample='up', activation=nn.ReLU(True), dropout=False)
+        self.dc7 = nn.Conv2d(128, out_ch, 3, 1, 1)
 
     def forward(self, x):
         hs = [nn.LeakyReLU(0.2, True)(self.c0(x))]
@@ -35,6 +39,8 @@ class _UNet(nn.Module):
         hs.append(self.c4(hs[3]))
         hs.append(self.c5(hs[4]))
         hs.append(self.c6(hs[5]))
+        hs.append(self.c7(hs[6]))
+        hs.append(self.c8(hs[7]))
         h = self.dc0(hs[-1])
         h = self.dc1(torch.cat((h, hs[-2]), 1))
         h = self.dc2(torch.cat((h, hs[-3]), 1))
@@ -42,6 +48,7 @@ class _UNet(nn.Module):
         h = self.dc4(torch.cat((h, hs[-5]), 1))
         h = self.dc5(torch.cat((h, hs[-6]), 1))
         h = self.dc6(torch.cat((h, hs[-7]), 1))
+        h = self.dc7(torch.cat((h, hs[-8]), 1))
         return h
 
 

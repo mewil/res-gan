@@ -45,7 +45,7 @@ class ResBlock(nn.Module):
         )
 
     def forward(self, x):
-        return x + self.conv_block(x)  # add skip connections
+        return x + self.conv_block(x)
 
 
 class UpSamplePixelShuffle(nn.Module):
